@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Amarok Client</title>
+
+    <link rel="stylesheet" type="text/css" href="css/main.css">
+    <link rel="stylesheet" type="text/css" href="skins/jplayer.blue.monday/jplayer.blue.monday-modified.css">
+    <link rel="stylesheet" href="css/bootstrap.css"  type="text/css"/>
+    <link rel="stylesheet" href="css/bootstrap-responsive.css"  type="text/css"/>
+
+    <script src="js/jquery.min.js"></script>
+    <script src="js/waypoints.min.js"></script>
+    <script src="js/jQuery.jPlayer.2.5.0/jquery.jplayer.min.js"></script>
+
+    <script id="currentPlaylistTemplate" type="text/x-handlebars-template">
+        {{#each items}}
+            <div id="currentList{{index}}" class="trackListItem">
+                <table class="playlistTable">
+                    <tr><td>
+                        <div class="currentListClickable"><a href="javascript:void(0);" onclick="removeFromPlaylist({{index}});">X</a></div>
+                    </td>
+                    <td>
+                        <div class="albumImageContainer" onclick="imageClicked({{image}},{{albumid}},'{{artistname}}','{{albumname}}','{{title}}');">
+                            <img name="{{albumid}}" src="/thumbnail/{{image}}" class="albumImage">
+                        </div>
+                    </td>
+                    <td onclick="play({{index}});">
+                        <div id="currentListClickable{{index}}" class="currentListClickable">
+                            <span class="large-text">{{title}}</span><div class="small currentListClickableDetails">{{artistname}}/{{albumname}}</div>
+                        </div>
+                    </td></tr>
+                </table>
+                <div class="starContainer">
+                    <div class="greyStar" onmouseup="ratingClick(event, this, {{id}});"></div>
+                    <div id="goldStar{{id}}" class="goldStar rating{{rating}}" onmouseup="ratingClick(event, this, {{id}});"></div>
+                    <div class="right-align">{{tracktime}}</div>
+                </div>
+            </div>
+        {{/each}}
+    </script>
+
+    <script id="trackListTemplate" type="text/x-handlebars-template">
+        {{#each items}}
+            <div class="trackListItem">
+                <div class="albumImageContainer" onclick="imageClicked({{image}},{{albumid}},'{{artistname}}','{{albumname}}','{{title}}');">
+                    <img name="{{albumid}}" src="/thumbnail/{{image}}" class="albumImage">
+                </div>
+                <a class="right-align" href="javascript:void(0);" onclick="chooseTrackAction({{id}},'{{{title}}}',{{artistid}},'{{artistname}}',{{albumid}},'{{albumname}}',{{image}},{{tracklength}},{{rating}});">add</a>
+                <span class="large-text">{{{title}}}</span><br>
+                <span class="small-text"><a href="javascript:void(0);" onclick="showArtist({{artistid}},null)">{{{artistname}}}</a> / <a href="javascript:void(0);" onclick="showAlbum({{artistid}},{{albumid}})">{{albumname}}</a>
+                </span>
+                <div class="starContainer">
+                    <div class="greyStar" onmouseup="ratingClick(event, this, {{id}});"></div>
+                    <div id="goldStar{{id}}" class="goldStar rating{{rating}}" onmouseup="ratingClick(event, this, {{id}});"></div>
+                    <div class="right-align">{{tracktime}}</div>
+                </div>
+            </div>
+        {{/each}}
+    </script>
+
+    <script id="albumListTemplate" type="text/x-handlebars-template">
+        {{#each items}}
+            <div class="albumListItem">
+                <div class="albumImageContainer" onclick="imageClicked({{image}},{{id}},'{{artistname}}','{{name}}',null);">
+                    <img name="{{id}}" src="/thumbnail/{{image}}" class="albumImage">
+                </div>
+                <span class="large-text"><a href="javascript:void(0);" onclick="showAlbum({{artistid}},{{id}});">{{{name}}}</a></span> <a class="right-align" href="javascript:void(0);" onclick="chooseAlbumAction({{id}});">add</a><br>
+                <span class="small-text"><div class="small"><a href="javascript:void(0);" onclick="showArtist({{artistid}},null);">{{{artistname}}}</a></span></div>
+            </div>
+        {{/each}}
+    </script>
+
+    <script id="artistListTemplate" type="text/x-handlebars-template">
+        {{#each items}}
+            <div class="artistListItem"><a href="javascript:void(0);" onclick="showArtist({{id}},null);">
+                <span class="large-text"> 
+                    {{{name}}}</a>
+                </span>
+                <a class="right-align" href="javascript:void(0);" onclick="chooseArtistAction({{id}});">add</a>
+            </div>
+        {{/each}}
+    </script>
+
+    <script id="artistTemplate" type="text/x-handlebars-template">
+        {{items.name}} <a href="javascript:void(0);" onclick="chooseArtistAction({{items.id}});">add</a><br>
+        <br>
+        {{#each items.albums}}
+            <div class="albumListItem">
+                <div class="albumImageContainer" onclick="imageClicked({{image}},{{id}},'{{artistname}}','{{name}}',null);">
+                    <img name="{{id}}" src="/thumbnail/{{image}}" class="albumImage">
+                </div>
+                <span onclick="expandTrackList('{{id}}');" class="listItemContent">
+                    {{{name}}} <a class="right-align" href="javascript:void(0);" onclick="chooseAlbumAction({{id}});">add</a>
+                </span>
+            </div>
+            <div id="tracks{{id}}" class="initiallyHidden trackList">
+                {{#each tracks}}
+                    {{number}}. {{title}} <a href="javascript:void(0);" onclick="chooseTrackAction({{id}},'{{title}}',{{artistid}},'{{artistname}}',{{../id}},'{{../name}}',{{../image}},{{tracklength}},{{rating}});">add</a><br>
+                {{/each}}
+            </div>
+        {{/each}}
+    </script>
+
+    <script id="albumTemplate" type="text/x-handlebars-template">
+        <div class="albumImageContainer" onclick="imageClicked({{items.image}},{{items.id}},'{{items.artistname}}','{{items.name}}',null);">
+            <img name="{{items.id}}" src="/thumbnail/{{items.image}}" class="albumImage">
+        </div>
+        {{items.name}} <a class="right-align" href="javascript:void(0);" onclick="chooseAlbumAction({{items.id}});">add</a>
+        <div class="trackList">
+            {{#each items.tracks}}
+                {{number}}. {{artistname}} / {{title}} <a href="javascript:void(0);" onclick="chooseTrackAction({{id}},'{{title}}',{{artistid}},'{{artistname}}',{{albumid}},'{{albumname}}',{{image}},{{tracklength}},{{rating}});">add</a><br>
+            {{/each}}
+        </div>
+    </script>
+
+    <script id="artistsStatsTemplate" type="text/x-handlebars-template">
+        {{#each items}}
+            {{artistname}}<br>
+        {{/each}}
+    </script>
+
+    <script id="trackDetailsTemplate" type="text/x-handlebars-template">
+        <div onclick="playerDetailsClick(event, this);">
+            {{artistname}}<br> 
+            {{title}}
+            <div id="currentlyPlayingRating">
+                <div id="greyStarCurrentlyPlaying" class="greyStar"></div>
+                <div id="goldStarCurrentlyPlaying" class="goldStar rating{{rating}}"></div>
+            </div>
+            <br><p></p>
+        </div>
+    </script>
+
+    <script id="playlistsTemplate" type="text/x-handlebars-template">
+        {{#each items}}
+            <span onclick="expandPlayList('{{id}}');" class="listItemContent">
+                {{name}} <a class="right-align" href="javascript:void(0);" onclick="choosePlaylistAction({{id}});">add</a>
+            </span>
+            <div id="playlist{{id}}" class="initiallyHidden trackList">
+                {{#each tracks}}
+                    {{listnumber}}. {{artistname}} / {{title}} <a href="javascript:void(0);" onclick="chooseTrackAction({{id}},'{{title}}',{{artistid}},'{{artistname}}',{{albumid}},'{{albumname}}',{{image}},{{tracklength}},{{rating}});">add</a><br>
+                {{/each}}
+            </div>
+        {{/each}}
+    </script>
+
+    <script id="randomTrackTemplate" type="text/x-handlebars-template">
+        <br>
+        Genre<br>
+        <select id="randomGenre">
+            <option value="0">Any</option>
+            {{#each items}}
+                <option value="{{id}}">{{name}}</option>
+            {{/each}}
+        </select><br>
+        <br>
+        Minimum Rating<br>
+        <div id="randomMinimumRating">
+            <div id="greyStarRandomMinimumRating" class="greyStar" onclick="ratingNoUpdateClick(event, this, 'goldStarRandomMinimumRating');"></div>
+            <div id="goldStarRandomMinimumRating" class="goldStar rating{{rating}}" onclick="ratingNoUpdateClick(event, this, 'goldStarRandomMinimumRating');"></div>
+            <input id="goldStarRandomMinimumRatingValue" type="hidden" value="{{rating}}"/>
+        </div>
+        <br>
+        <br>
+        <br>
+        <br>
+        <button type="button" class="btn btn-Primary" onclick="chooseRandomTracksAction($('#randomGenre').val(), $('#goldStarRandomMinimumRatingValue').val());">Play Random Tracks</button>
+    </script>
+</head>
+<body>
+<div class="container">
+    <div id="player" class="playerSmall">
+        <div>
+            <img id="playerImg" name="" src="/image/0" class="playerImgSmall" onmouseenter="showPlayerControls();" onclick="showPlayerControls();">
+            <img id="playerControlsPause" class="initiallyHidden" src="img/playerControlsPause.png" onclick="playerImageClick(event, this);">
+            <div id="playerDetails" class="playerDetailsLarge"></div> 
+        </div>
+        <!--<audio id="audioPlayer" autoplay="autoplay" controls="controls" preload="auto" type="audio/mp3">
+            <p>Your browser does not support the audio element.</p>
+        </audio>-->
+        <div id="jquery_jplayer_1" class="jp-jplayer"></div>
+        <div class="container">
+            <div id="jp_container_1" class="jp-audio">
+                <div class="jp-type-single">
+                    <div class="jp-gui jp-interface">
+                        <table width="98%">
+                            <tr><td width="100px">
+                                <ul class="jp-controls">
+                                    <li><a href="javascript:;" id="playPrevious" class="jp-previous" tabindex="1">previous</a></li>
+                                    <li><a href="javascript:;" class="jp-play" tabindex="1">play</a></li>
+                                    <li><a href="javascript:;" class="jp-pause" tabindex="1">pause</a></li>
+                                    <li><a href="javascript:;" id="playNext" class="jp-next" tabindex="1">next</a></li>
+                                </ul>
+                            </td><td>
+                                <div class="jp-progress">
+                                    <div class="jp-seek-bar">
+                                        <div class="jp-play-bar"></div>
+                                    </div>
+                                </div>
+                                <div class="jp-time-holder">
+                                    <div class="jp-current-time"></div>
+                                    <div class="jp-duration"></div>
+                                </div>
+                            </td></tr>
+                        </table>
+                        <div id="currentTrackInfo" class="playerArtistInfo"></div>
+                    </div>
+                    <div class="jp-no-solution">
+                        <span>Update Required</span>
+                        To play the media you will need to either update your browser to a recent version or update your <a href="http://get.adobe.com/flashplayer/" target="_blank">Flash plugin</a>.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="menuBar" class="nav nav-pills"> 
+        <li id="mnucurrentPlaylist"><a class="navbar-brand" href="javascript:void(0);" onclick="showCurrentPlaylist();">Current</a></li>
+        <li id="mnutop25" class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Lists<b class="caret"></b></a>
+            <ul class="dropdown-menu">
+                <li><a href="javascript:void(0);" onclick="showTop25('favorite', 'artists');">Favorite Artists</a></li>
+                <li><a href="javascript:void(0);" onclick="showTop25('mostplayed', 'artists');">Most Played Artists</a></li>
+                <li><a href="javascript:void(0);" onclick="showTop25('recent', 'artists');">Recently Played Artists</a></li>
+                <li class="divider"></li>
+                <li><a href="javascript:void(0);" onclick="showTop25('favorite', 'albums');">Favorite Albums</a></li>
+                <li><a href="javascript:void(0);" onclick="showTop25('mostplayed', 'albums');">Most Played Albums</a></li>
+                <li><a href="javascript:void(0);" onclick="showTop25('recent', 'albums');">Recently Played Albums</a></li>
+                <li><a href="javascript:void(0);" onclick="showTop25('new', 'albums');">New Albums</a></li>
+                <li class="divider"></li>
+                <li><a href="javascript:void(0);" onclick="showTop25('favorite', 'tracks');">Favorite Tracks</a></li>
+                <li><a href="javascript:void(0);" onclick="showTop25('mostplayed', 'tracks');">Most Played Tracks</a></li>
+                <li><a href="javascript:void(0);" onclick="showTop25('recent', 'tracks');">Recently Played Tracks</a></li>
+                <li><a href="javascript:void(0);" onclick="showRandom();">Random Tracks</a></li>
+            </ul>
+        </li>
+        <li id="mnusearchResult"><a class="navbar-brand" href="javascript:void(0);" onclick="showSearch();">Search</a></li>
+        <li id="mnuplaylists"><a class="navbar-brand" href="javascript:void(0);" onclick="showPlaylists();">Playlists</a></li> 
+    </div>
+    <div id="currentPlaylist"></div>
+    <div id="playlists"></div>
+    <div id="searchResult" class="invisibleList">
+        <input id="searchText" type="text" class="input-block-level"></input>
+        <div id="searchResultList" class="invisibleList">
+            <h3>Artists</h3>
+            <div id="artistList"></div>
+            <h3>Albums</h3>
+            <div id="albumList"></div>
+            <h3>Tracks</h3>
+            <div id="trackList"></div>
+        </div>
+    </div>
+    <div id="top25">
+        <h3><div id="top25Title"></div></h3>
+        <div id="top25List"></div>
+    </div>
+    <div id="artistInfo"></div>
+    <div id="albumInfo"></div> 
+</div>
+
+<!-- Assign image window -->
+<div class="modal hide" id="albumAssignImage" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">Specify image URL to assign as album cover.</h4>
+            </div>
+            <div class="modal-body">
+                <p>
+                    <input id="assignImageUrl" type="text" class="input-block-level"></input><br>
+                    <a id="assignImageSuggestions" href="" target="_blank">Get image suggestions</a>
+                    <input id="assignImageAlbumId" type="hidden"  value=""/>
+                    <input id="assignImageOriginalImageId" type="hidden"  value=""/>
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button id="btnAssignCover" type="button" class="btn btn-primary" onclick="assignImage();">Set Cover</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Show image window -->
+<div class="modal hide" id="albumShowImage" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">Album Cover</h4>
+            </div>
+            <p>
+                <img id="fullSizeImageDisplay" src="" class="modalWindowBody">
+                <input id="fullSizeImageId" type="hidden"  value=""/>
+                <input id="fullSizeImagealbumId" type="hidden"  value=""/>
+                <input id="fullSizeImagealbumName" type="hidden"  value=""/>
+                <input id="fullSizeImageartistName" type="hidden"  value=""/>
+                <input id="fullSizeImagetrackName" type="hidden"  value=""/>
+            </p>
+            <div class="modal-footer">
+                <button id="btnShowReplaceCover" type="button" class="btn btn-primary" onclick="replaceImage();">Replace Cover</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tracks action widow -->
+<div class="modal hide" id="tracksAction" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">Choose Action For Tracks</h4>
+            </div>
+            <div class="modalWindowBody">
+                <button id="btnEnqueueTracks" type="button" class="modalWindowBlock btn btn-primary btn-default" onclick="handleTracksAction('enqueue');">Enqueue in current playlist</button><br><br>
+                <button id="btnReplaceWithTracks" type="button" class="modalWindowBlock btn btn-primary btn-default" onclick="handleTracksAction('replace');">Replace current playlist</button><br><br>
+                <!--<button id="btnAddToPlaylist" type="button" class="modalWindowBlock btn btn-primary btn-default" onclick="handleTracksAction('addToPlaylist');">Add to stored playlist</button>-->
+            </div>
+            <input id="tracksActionType" type="hidden"  value=""/>
+            <input id="tracksActionValue" type="hidden"  value=""/>
+            <input id="tracksActionValue2" type="hidden"  value=""/>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="js/bootstrap.js"></script>
+<script src="js/handlebars.js"></script>
+<script src="js/index.js"></script>
+</body>
+</html>

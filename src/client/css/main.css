@@ -1,0 +1,273 @@
+
+body {
+    background-image: url(../img/background.png);
+    background-repeat: repeat;
+}
+    
+td {
+    vertical-align: top;
+    padding-left: 5px;
+}
+.menuBarSmallPlayer {
+    padding-top: 65px;
+}
+
+.large-text {
+    font-size: 1.1em;
+}
+
+
+.small-text {
+    font-size: 0.8em;
+}
+
+.artistListItem, .row-fluid {
+    clear: both;
+    padding: 5px;
+    border-radius: 5px; 
+}
+
+.albumListItem, .row-fluid {
+    clear: both;
+    padding: 5px;
+    border-radius: 5px; 
+    height: 50px;
+}
+
+.trackListItem, .row-fluid {
+    clear: both;
+    padding: 5px;
+    border-radius: 5px; 
+    height: 77px;
+}
+
+.listItemContent {
+    display: block;
+    height: 50px;
+}
+
+.trackList {
+    clear: both;
+    padding-left: 15px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+.artistListItem:hover {
+    background-color: #c6ddf3;
+    opacity: 0.9;
+}
+
+.albumListItem:hover {
+    background-color: #c6ddf3;
+    opacity: 0.9;
+}
+
+.trackListItem:hover {
+    background-color: #c6ddf3;
+    opacity: 0.9;
+}
+
+.invisibleList {
+    display: none;
+    background-image: none; 
+}
+
+.visibleList {
+    width: inherit;
+    padding-top: 5px;
+    background-image: url(../img/amarok.png);
+    background-repeat: no-repeat;
+    background-position: center 70px;
+}
+
+.visibleContent {
+    width: inherit;
+    padding-top: 5px;
+}
+
+.initiallyHidden {
+    display: none;
+}
+
+.currentPlaylist {
+}
+
+.currentlyPlaying {
+    background-color: #78abdb;
+    opacity: 0.9;
+}
+
+.currentListClickable {
+    width: inherit;
+}
+
+.currentListClickableDetails {
+    font-size: 9;
+    width: inherit;
+}
+
+.albumImageContainer {
+    float: left;
+    padding-right: 5px;
+}
+
+.albumImage {
+    width: 50px;
+    height: 50px;
+    cursor: pointer;
+}
+
+.imageSetWindow {
+    position: fixed;
+    border: solid 1px black;
+    left: 50%;
+    top: 50%;
+    background-color: white;
+    z-index: 100;
+
+    height: 100px;
+    margin-top: -200px;
+
+    width: 300px;
+    margin-left: -300px;
+}
+
+.greyStar {
+    position: absolute;
+    background-image: url(../img/greystar.png);
+    background-repeat: repeat-x;
+    height: 26px;
+    width: 129px;
+}
+
+.goldStar {
+    position: absolute;
+    background-image: url(../img/goldstar.png);
+    background-repeat: repeat-x;
+    height: 26px;
+}
+
+.playerLarge {
+    border: solid;
+	border-color: #FFFFFF;
+    background-color: #FFFFFF;
+}
+
+.playerSmall {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: auto;
+    width: 100%;
+    z-index: 1;
+}
+
+.playerImgLarge {
+    width: 100%;
+    max-height: 90%;
+    min-height: 270px;
+    background-color: blue;
+}
+
+.playerImgSmall {
+    display: none;
+}
+
+.playerDetailsLarge {
+    position: absolute;
+    top: 10px;
+    opacity:0.9;
+    border-radius: 5px;
+    margin-left: 15px;
+    padding: 5px;
+    background-color:#ffffff;
+    width: 77vw;
+    max-width: 1120px;
+    text-align: center;
+    display: none;
+}
+
+.playerArtistInfo {
+    width: 100%;
+    text-align: center;
+    font-size: 0.64em;
+    background-color: #F2F2F2;
+}
+
+.playlistTable {
+    display: block;
+}
+
+#playerControlsPause {
+    position: absolute;
+    width: 80%;
+    left: 10%;
+    max-height: 90%;
+    opacity:0.7;
+}
+
+.rating0 { width: 0px; }
+.rating1 { width: 13px; }
+.rating2 { width: 26px; }
+.rating3 { width: 39px; }
+.rating4 { width: 52px; }
+.rating5 { width: 65px; }
+.rating6 { width: 78px; }
+.rating7 { width: 91px; }
+.rating8 { width: 104px; }
+.rating9 { width: 117px; }
+.rating10 { width: 129px; }
+
+.starContainer {
+    clear: both;
+    padding-top: 2px;
+    width: inherit;
+    position: inline-block;
+}
+
+.right-align {
+    float: right;
+}
+
+#audioPlayerLarge {
+    vertical-align: bottom;
+    width: 100%;
+}
+
+#audioPlayer {
+    vertical-align: bottom;
+    width: 100%;
+}
+
+.modalWindowBody {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: 95%
+}
+
+.modalWindowBlock {
+    width: 100%
+}
+
+#previousIcon {
+    position: absolute;
+    top: 42%;
+    background-color: orange;
+}
+
+#nextIcon {
+    position: absolute;
+    top: 42%;
+    right: 14vh;
+    background-color: orange;
+}
+
+#pauseIcon {
+    top: 42%;
+    left: 47%;
+    display: block;
+    height: inherit;
+    background-color: orange;
+}

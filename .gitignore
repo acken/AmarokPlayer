@@ -1,0 +1,10 @@
+*~
+*.swp
+*.pyc
+~$*
+*.sublime-project
+*.sublime-workspace
+.OpenIDE/active.profile
+oi-definitions.json
+
+config.js
