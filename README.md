@@ -3,9 +3,7 @@ AmarokPlayer
 
 A web audio streaming player hooking into the Amarok music player
 
-Dependencies:
-    node v0.8
-    imagemagic
+Dependencies: node v0.8, imagemagic
 
 AmarokPlayer consists of a backend integrating with the Amarok mysql database and filesystem and a web frontend.
 
